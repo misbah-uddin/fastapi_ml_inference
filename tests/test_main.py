@@ -5,8 +5,8 @@ from unittest.mock import patch
 from faker import Faker
 from starlette.testclient import TestClient
 
-from api_models import PredictionRequest
-from main import app
+from housing.api_models import PredictionRequest
+from housing.main import app
 
 
 def get_faker(seed=1234):
