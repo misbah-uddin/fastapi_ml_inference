@@ -1,16 +1,15 @@
 
-import threading
-
-from fastapi import FastAPI, HTTPException
-from housing.api_models import PredictionRequest, PredictionResponse, TrainRequest
-from housing.services import predict_housing_price
+from fastapi import FastAPI
+from api_models import PredictionRequest, PredictionResponse
+from services import predict_housing_prices
 
 
 app = FastAPI()
 
 
-@app.post("/predict", response_model=PredictionResponse)
-def predict(input: PredictionRequest):
-    price = predict_housing_price(state=input.state, data=input.to_dict())
-    response = PredictionResponse(price=price)
-    return response
+@app.post("/predict")
+def predict(prediction_request: PredictionRequest):
+    response = predict_housing_prices(**prediction_request.dict())
+    print (response)
+    prediction_response = PredictionResponse(**response)
+    return prediction_response

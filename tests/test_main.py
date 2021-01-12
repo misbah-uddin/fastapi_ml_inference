@@ -4,10 +4,8 @@ from unittest.mock import patch
 
 from faker import Faker
 from starlette.testclient import TestClient
-from fastapi import HTTPException
 
-
-from housing.api_models import PredictionRequest
+from api_models import PredictionRequest
 from main import app
 
 
@@ -48,15 +46,6 @@ fake_price = fake.pyfloat()
 fake_state = fake.pystr()
 
 
-class TestRootEndpoint(unittest.TestCase):
-    def setUp(self):
-        self.endpoint = "/"
-
-    def test_get_root(self):
-        response = test_client.get(self.endpoint)
-        self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.json())
-
 class TestPredictEndpoint(unittest.TestCase):
 
     def setUp(self):
@@ -80,30 +69,3 @@ class TestPredictEndpoint(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
         self.assertDictEqual(response.json()["detail"][0], expected_response)
         predict_func.assert_not_called()
-
-
-class TestTrainEndpoint(unittest.TestCase):
-
-    def setUp(self):
-        self.endpoint = "/train"
-
-    @patch("main.train_model_asynchronous", return_value=None)
-    def test_post_train(self, train_func):
-        response = test_client.post(self.endpoint, json={"state": fake_state})
-        self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.json())
-        train_func.assert_called_once_with(fake_state)
-
-    @patch("main.train_model_asynchronous", return_value=None)
-    def test_post_train_fail(self, train_func):
-        response = test_client.post(self.endpoint, json={"state": fake_state})
-        self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.json())
-        train_func.assert_called_once_with(11)
-
-    @patch("main.train_model_asynchronous", return_value=None, side_effect = HTTPException(status_code=400))
-    def test_post_train_httpexception(self, train_func):
-        response = test_client.post(self.endpoint, json={"state": fake_state})
-        self.assertEqual(response.status_code, 400)
-        self.assertIsNotNone(response.json())
-        train_func.assert_called_once_with(fake_state)
